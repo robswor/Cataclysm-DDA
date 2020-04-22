@@ -205,6 +205,7 @@ static bool get_liquid_target( item &liquid, item *const source, const int radiu
         item *const cont = target.item_loc.get_item();
 
         if( cont == nullptr || cont->is_null() ) {
+            /*
             // check for buckets
             std::vector<item*> invList = g->u.inv_dump();
             // check for inv size w/o buckets
@@ -219,7 +220,7 @@ static bool get_liquid_target( item &liquid, item *const source, const int radiu
                     add_msg( _( "To fill an open container, you must wield it or place it on the groudn." ));
                     return;
                 }
-            }
+            }*/
 
             add_msg( _( "Never mind." ) );
             return;
