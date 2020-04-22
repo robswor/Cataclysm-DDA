@@ -8032,6 +8032,10 @@ int item::get_remaining_capacity_for_liquid( const item &liquid, const Character
         }
     }
 
+    if ( res == 0 && get_remaining_capacity_for_liquid( liquid, true ) > 0 ) {
+        add_msg( _( "To fill open containers, you must place them on the ground or wield them." ) );
+    }
+
     return res;
 }
 

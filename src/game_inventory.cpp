@@ -382,18 +382,42 @@ item_location game::inv_map_splice( item_filter filter, const std::string &title
 item_location game_menus::inv::container_for( avatar &you, const item &liquid, int radius )
 {
     const auto filter = [ &liquid ]( const item_location & location ) {
+
         if( location.where() == item_location::type::character ) {
             Character *character = g->critter_at<Character>( location.position() );
             if( character == nullptr ) {
                 debugmsg( "Invalid location supplied to the liquid filter: no character found." );
                 return false;
             }
-            return location->get_remaining_capacity_for_liquid( liquid, *character ) > 0;
+
+            int cap = location->get_remaining_capacity_for_liquid( liquid, *character );
+            if ( cap == 0 ) {
+                if ( location->get_remaining_capacity_for_liquid( liquid, false ) == 0 &&
+                      location->get_remaining_capacity_for_liquid( liquid, true ) > 0 ) {
+                    popup( _( "To fill open containers, you must place them on the ground or wield them." ),
+                            PF_GET_KEY );
+                }
+            }
+
+            return cap > 0;
         }
 
         const bool allow_buckets = location.where() == item_location::type::map;
-        return location->get_remaining_capacity_for_liquid( liquid, allow_buckets ) > 0;
+        int cap = location->get_remaining_capacity_for_liquid( liquid, allow_buckets );
+
+        //This checks for an open container within the inventory, but no other usable containers.
+        if ( cap == 0 ) {
+            if ( location->get_remaining_capacity_for_liquid( liquid, false ) == 0 &&
+                  location->get_remaining_capacity_for_liquid( liquid, true ) > 0 ) {
+                popup( _( "To fill open containers, you must place them on the ground or wield them." ),
+                        PF_GET_KEY );
+            }
+        }
+        
+        return cap > 0;
     };
+
+
 
     return inv_internal( you, inventory_filter_preset( filter ),
                          string_format( _( "Container for %s" ), liquid.display_name( liquid.charges ) ), radius,
